@@ -1,26 +1,36 @@
+var id = window.localStorage.getItem("email");
+window.onload = islog;
+function islog() {
+  setTimeout(function(){if(id!=undefined){alert("Already logged in");window.location.href = "../html/product.html";}}, 1000);
+}
+
+
 $("form").on("submit", function (event) {
   event.preventDefault();
   const email = $("input[id=email]").val();
   const password = $("input[id=password]").val();
-  console.log(email);
-  console.log(password);
-  var mycreds = [{
-    "id": "4",
-    "name": "Aaditya Raj",
-    "email": "aaditya.raj@increff.com",
-    "password": "password1234"
-  }];
-  $.getJSON(mycreds, function (mycreds) {
-    const user = users.filter(users => email === users.email && password === users.password);
-    console.log(user);
-    if (user.length) {
-      $("#errormessage").addClass("d-none");
-      console.log("Logged in successfully");
-      window.location.href = "/html/product.html";
-    }
-    else {
-      $("#errormessage").removeClass("d-none");
-      console.log("error in username or password");
-    }
+  fetch("../assets/creds.json").then(response => {
+    return response.json();
+  }).then(data => {
+    creds = JSON.stringify(data);
+    validate(creds);
   });
+  function validate(data) {
+    var user = JSON.parse(data);
+    var i = 0;
+    var loggedin = false;
+    while (user[i]) {
+      if (user[i].email === email && user[i].password === password) {
+        $("#errormessage").addClass("d-none");
+        window.location.href = "../html/product.html";
+        window.localStorage.setItem("email", user[i].id);
+        loggedin = true;
+        break;
+      }
+      i = i + 1;
+    }
+    if (!loggedin) {
+      $("#errormessage").removeClass("d-none");
+    }
+  }
 });

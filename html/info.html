@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title id="title"></title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="-1" />
+  <meta http-equiv="cache-control" content="no-cache" />
+  <link rel="icon" href="https://storage.googleapis.com/www.increff.com/img/favicon.png?v=2" type="image/x-icon" />
+  <link crossorigin="anonymous" rel="stylesheet"
+    href="https://storage.googleapis.com/static.increff.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+  <link crossorigin="anonymous" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+  <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid d-flex justify-content-start">
+      <a class="navbar-brand" href="product.html"><img src="../assets/logo.png" alt="Increff Logo"
+          style="filter: brightness(0) invert(1);"></a>
+      <!-- <ul class="navbar-nav mx-4">
+        <li class="nav-item active px-2">
+          <a class="nav-link" href="product.html">
+            <h5 class="text-primary">Products</h5>
+          </a>
+        </li>
+      </ul> -->
+      <ul class="navbar-nav ml-auto mr-3">
+        <li class="nav-item text-light">
+          <a class="nav-link" href="cart.html">
+            <h5 class="text-white">Cart</h5>
+          </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav mr-3">
+        <li class="nav-item text-light">
+          <a class="nav-link" href="login.html" onclick="logout()">
+            <h5 class="text-white">Logout</h5>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container-fluid mt-5 pt-5">
+    <div class="row d-flex justify-content-center align-items-center h-100 info d-none" id="product">
+      <div class="col-md-4 text-center">
+        <img src="" alt="No Image Available" id="pImage" class="image-fluid rounded" >
+      </div>
+      <div class="col-md-8">
+        <h3 id="pBrand"></h3>
+        <h4 class="text-muted" id="pName"></h4>
+        <h3 id="pPrice"></h3>
+        <div class="input-group form-row">
+          <input type="number" min="1" step="1" default="1" class="form-control col-md-4" placeholder="Enter Quantity"
+            aria-label="Enter Quantity" aria-describedby="basic-addon2">
+          <div class="input-group-append">
+            <button type="submit" class="btn btn-primary" id="add-cart">
+              Add To Cart
+            </button>
+          </div>
+        </div>
+        <br>
+        <h4 id="pDescr" ></h4>
+      </div>
+    </div>
+    <script crossorigin="anonymous"
+      src="https://storage.googleapis.com/static.increff.com/jquery/3.3.1/jquery-3.3.1.min.js"></script>
+    <script crossorigin="anonymous"
+      src="https://storage.googleapis.com/static.increff.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/product.js"></script>
+    <script src="../js/logout.js"></script>
+    <script src="../js/info.js"></script>
+  </div>
+</body>
+<footer class="bg-light mt-auto d-flex justify-content-center pt-3">
+  <p>Copyrigth Increff 2022</p>
+</footer>
+
+</html>
