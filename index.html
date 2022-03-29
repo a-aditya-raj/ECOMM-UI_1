@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Products</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="-1" />
+  <meta http-equiv="cache-control" content="no-cache" />
+  <link rel="icon" href="https://storage.googleapis.com/www.increff.com/img/favicon.png?v=2" type="image/x-icon" />
+  <link crossorigin="anonymous" rel="stylesheet"
+    href="https://storage.googleapis.com/static.increff.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+  <link crossorigin="anonymous" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+    integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+  <script src="./js/alert.js"></script>
+
+</head>
+
+<body>
+  <div class="toast-container"></div>
+  <nav class="navbar sticky-top navbar-dark bg-light shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand mr-auto" href="./index.html">
+        <img src="./assets/logo.png" />
+      </a>
+      <div class="nav-item">
+        <a class="nav-link text-dark position-relative" href="./html/upload.html">
+          <i class="fas fa-file-upload fa-lg" data-tooltip="tooltip" data-placement="bottom" title="Upload"></i>
+        </a>
+      </div>
+      <div class="nav-item pr-2">
+        <a class="nav-link text-dark position-relative" href="./html/cart.html">
+          <i class="fas fa-shopping-cart fa-lg" data-tooltip="tooltip" data-placement="bottom" title="Checkout"></i>
+          <span class="badge badge-pill badge-secondary cart-quantity">0</span>
+        </a>
+      </div>
+      <div class="nav-item px-2">
+
+        <a class="nav-link text-dark position-relative" onclick="logout1()">
+          <i class="fas fa-sign-out-alt fa-lg" data-tooltip="tooltip" data-placement="bottom" title="logout"></i></a>
+
+      </div>
+    </div>
+
+
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2 pt-3" id="filters">
+        <div class="d-flex justify-content-between">
+          <h4 id="showFilters">Filters</h4><strong><span id="icon1"></span></strong>
+        </div>
+        <hr>
+        <div id="Filter">
+          <div class="d-flex justify-content-between" id="showBrand">
+            <h5>Brands</h5><strong><span id="icon2"></span></strong>
+          </div>
+
+          <ul id="brands">
+            <li class="d-none" id="filter-list">
+              <input class="form-check-input" type="checkbox" value="" id="checkbox">
+              <label class="form-check-label" for="checkbox" id="name">
+            </li>
+          </ul>
+        </div>
+
+      </div>
+      <div class="col-sm-12 col-md-10 col-lg-10 col-xl-10">
+        <div class="row">
+          <div class="col-12 d-flex justify-content-between pt-3 pr-5">
+            <div class="pt-2 pl-3">
+              <h6>Showing <span class="result"></span> Products</h6>
+            </div>
+            <a id="sort">
+              <h6 class="border rounded p-2">Sort By Price</h6>
+            </a>
+          </div>
+        </div>
+        <div class="row d-flex justify-content-start mx-auto" id="list-container">
+          <div class="d-none" id="demo">
+            <div class="d-flex flex-column my-2 product-container col-14 col-md-5 col-lg-4 col-xl-3" id="product-list">
+              <div class="card border rounded shadow-sm cursor-pointer p-3">
+                <div class="mx-auto" id="link1">
+                  <img class="img-fluid rounded img-thumbnail border-0" src="" alt="Image not Available">
+                </div>
+                <div class="product-detail my-1 px-1 position-relative" id="link2">
+                  <div class="font-weight-bold product-brand"></div>
+                  <small class="text-secondary product-name"></small>
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                      <small class="pr-1 text-secondary">Size:</small>
+                      <span class="product-size"></span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                      <small class="pr-1 text-secondary">MRP:</small>
+                      <i class="fas fa-rupee-sign fa-sm pr-1"></i>
+                      <span class="font-weight-bold product-mrp"></span>
+                    </div>
+
+                  </div>
+                </div>
+                <div class="cart-section d-flex justify-content-center pt-3" id="cart-section">
+                  <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()"
+                    class="minus btn btn-sm btn-outline-dark mx-1"><i class="fa fa-minus"
+                      aria-hidden="true"></i></button>
+                  <input class="small py-1 px-2 mx-2" value="1" min="1" type="number" id="input">
+                  <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()"
+                    class="plus btn btn-sm btn-outline-dark mx-1"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                  <button class="btn btn-primary btn-sm mx-2" id="addbtn">Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script crossorigin="anonymous"
+    src="https://storage.googleapis.com/static.increff.com/jquery/3.3.1/jquery-3.3.1.min.js"></script>
+  <script crossorigin="anonymous"
+    src="https://storage.googleapis.com/static.increff.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <script src="./js/product.js"></script>
+  <script src="./js/global.js"></script>
+  </div>
+</body>
+<footer class="bg-light mt-auto d-flex justify-content-center pt-3">
+  <p>Copyrigth Increff 2022</p>
+</footer>
+
+</html>

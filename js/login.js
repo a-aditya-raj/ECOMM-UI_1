@@ -1,7 +1,8 @@
-var id = window.localStorage.getItem("email");
+var id = window.localStorage.getItem(getUserKey());
 window.onload = islog;
 function islog() {
-  setTimeout(function(){if(id!=undefined){alert("Already logged in");window.location.href = "../html/product.html";}}, 1000);
+  console.log(id);
+  setTimeout(function(){if(id!=undefined){alert("Already logged in");window.location.href = "../index.html";}}, 1000);
 }
 
 
@@ -21,10 +22,8 @@ $("form").on("submit", function (event) {
     var loggedin = false;
     while (user[i]) {
       if (user[i].email === email && user[i].password === password) {
-        $("#errormessage").addClass("d-none");
-        window.location.href = "../html/product.html";
-        window.localStorage.setItem("email", user[i].id);
-        loggedin = true;
+        setUser(user[i]);
+        window.location.href = "../index.html";
         break;
       }
       i = i + 1;
@@ -33,4 +32,22 @@ $("form").on("submit", function (event) {
       $("#errormessage").removeClass("d-none");
     }
   }
+  
 });
+
+function setUser(user) {
+  localStorage.setItem(getUserKey(), JSON.stringify(user));
+}
+
+function isUserLoggedIn() {
+  const user = localStorage.getItem(getUserKey());
+  return !!user;
+}
+
+function redirectToHome() {
+  window.location.href = '/';
+}
+
+function getUserKey() {
+  return 'user';
+}
