@@ -12,25 +12,19 @@ function showToaster(message, heading, type = 'danger' || 'success') {
           </div>
       </div>`;
 
-  // Attaching the message toasts dynamically
   $('.toast-container').append(toaster);
 
-  // Remove the autohide functionality of the toasts for danger type toasts
   if (type === 'danger') $('.toast.danger').attr('data-autohide', false);
 
   $('.toast').toast('show');
   $('.toast').on('hidden.bs.toast', function () {
-      // Removing the toast from the view when the user clicks on the cross button
-      $(this).remove();
+    $(this).remove();
   });
 }
-
-// Tp show success toasts
 function showSuccess(message = "Success message", heading = "Success",) {
   this.showToaster(message, heading, 'success');
 }
 
-// To show error toasts
 function showError(message = "Error message", heading = "Error") {
   this.showToaster(message, heading, 'danger');
 }

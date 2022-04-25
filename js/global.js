@@ -1,17 +1,16 @@
 $(document).ready(function () {
     if (!isUserLoggedIn()) redirectToLogin();
+    checkuser();
     updateCartQuantity();
-    setInterval(setDateTime, 1000);
+    setDateTime();
     $('[data-tooltip="tooltip"]').tooltip();
+
     setLoggedInUser();
+
 });
 function logout() {
     window.localStorage.removeItem("user");
     window.location.href = "../html/login.html";
-}
-function logout1() {
-    window.localStorage.removeItem("user");
-    window.location.href = "./html/login.html";
 }
 function getUserKey() {
     return 'user';
@@ -23,16 +22,26 @@ function getCartKey() {
 
 function getUser() {
     try {
-        const user = JSON.parse(localStorage.getItem("user"));
+        const user = JSON.parse(localStorage.getItem(getUserKey()));
         return user;
+
     } catch (err) {
-        return void 0;
+        logout();
     }
 }
 
 function setLoggedInUser() {
-    const user = getUser();
-    $('#user-name').text(user.name).removeClass('d-none');
+    const users = getUser();
+    fetch("../assets/creds.json").then(response => {
+        return response.json();
+    }).then(data => {
+        for (const key of data) {
+            if (key.id == users) {
+                $("#user-name").text("Hi, " + key.name);
+                break;
+            }
+        }
+    });
 }
 
 function isUserLoggedIn() {
@@ -56,11 +65,11 @@ function logout() {
 
 
 function redirectToLogin() {
-    window.location.href = '../html/login.html';
+    window.location.href = './login.html';
 }
 
 function redirectToHome() {
-    window.location.href = '/';
+    window.location.href = './product.html';
 }
 
 // To set the current date-time
@@ -73,16 +82,19 @@ function setDateTime() {
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-            second: '2-digit',
         }));
 }
 
-function setCartItems(items) {
+async function setCartItems(items) {
+    await checkuser();
+    if (!checkSession()) return;
+
     const cartMap = getCartMap();
     const user = getUser();
 
-    cartMap[user.id] = items;
+    cartMap[user] = items;
     localStorage.setItem(getCartKey(), JSON.stringify(cartMap));
+    updateCartQuantity();
 }
 
 // returning the cart map or an empty map if lcoalstorage is empty
@@ -96,22 +108,27 @@ function getCartItems() {
     try {
         const itemMap = getCartMap();
         const user = getUser();
-        return itemMap.hasOwnProperty(user.id) ? itemMap[user.id] : [];
+        return itemMap.hasOwnProperty(user) ? itemMap[user] : [];
     } catch (err) {
         return [];
     }
 }
 var totalQuantity = 0;
-function updateCartQuantity() {
+async function updateCartQuantity() {
+    await checkuser();
+    if (!checkSession()) return;
+
     const cartItems = getCartItems();
     totalQuantity = cartItems.reduce((accr, curr) => accr += curr.quantity, 0);
 
     $('.cart-quantity').text(totalQuantity);
+    $('#total-items').text(totalQuantity);
 
 }
 
 
-function addToCart(productId, quantity) {
+async function addToCart(productId, quantity) {
+    await checkuser();
     if (!checkSession()) return;
 
     if (quantity < 1) {
@@ -127,7 +144,7 @@ function addToCart(productId, quantity) {
             if (cartItems[index].quantity == undefined) {
                 cartItems[index].quantity = quantity;
                 setCartItems(cartItems);
-    
+
                 updateCartQuantity();
                 showSuccess('Product added successfully');
                 return;
@@ -135,7 +152,7 @@ function addToCart(productId, quantity) {
             else {
                 cartItems[index].quantity = quantity;
                 setCartItems(cartItems);
-    
+
                 updateCartQuantity();
                 showSuccess('Product updated successfully');
                 return;
@@ -149,7 +166,8 @@ function addToCart(productId, quantity) {
     setCartItems(cartItems);
 
     updateCartQuantity();
-    showSuccess('Product added successfully');
+
+    showSuccess("Product added successfully");
 }
 
 function getQuant(id) {
@@ -163,4 +181,41 @@ function getQuant(id) {
         }
     }
     return quant;
+}
+
+async function deletethis(products, productId) {
+    await checkuser();
+    if (!checkSession()) return;
+    let cartItems = getCartItems();
+
+    cartItems = cartItems.filter(item => item.id !== productId);
+    setCartItems(cartItems);
+    $('#product-list').find('#' + productId).first().remove();
+
+    // Setting the total item value
+    $('#total-items').text(totalQuantity || 0);
+    // Updating the payment info to consolidate the removed product.
+    updatePayment(products, cartItems);
+
+    // Removing payment section from view if the cart is empty
+    if (!cartItems.length) removePaymentSection();
+
+    $('.cart-quantity').text(totalQuantity || 0);
+    showSuccess("Product removed.");
+
+}
+async function checkuser() {
+    const user = getUser();
+    let response = await fetch("../assets/creds.json");
+    let data = await response.json();
+    let valid = true;
+    for (const key of data) {
+        if (key.id == user) {
+            valid = false;
+            break;
+        }
+    }
+    if (valid) {
+        logout();
+    }
 }

@@ -1,4 +1,6 @@
-$(document).ready(() => {
+$(document).ready(async function() {
+    await checkuser();
+    if (!checkSession()) return;
     const cartItems = getCartItems();
 
     if (!cartItems?.length) {
@@ -28,24 +30,22 @@ $(document).ready(() => {
             if (product && cartItem?.quantity > 0) {
                 const clone = entry.clone();
                 clone.removeClass('d-none');
-
                 // Setting a custom id to be used to find the product
                 clone.attr('id', product.id);
 
-                // Attaching id and event handlers to delete the product
-                clone.find('.fa-trash-alt').attr('id', 'delete-' + product.id, 'data-product-id', product.id).on({
-                    'click': () => deleteProduct(products, product.id)
-                });
-
                 // Adding the attributes and values of the product in the cloned element
                 clone.find('img').attr('src', product?.imageUrl || '');
+                clone.find('#inputquantity').text(getQuant(product.id));
+                clone.find('#inputquantity').attr('id', 'inputquantity' + product.id);
+                clone.find('#increasebtn').attr('id', 'increasebtn' + product.id);
+                clone.find('#decreasebtn').attr('id', 'decreasebtn' + product.id);
                 clone.find('.product-brand').text(product?.brand || '');
                 clone.find('.product-name').text(product?.name || '');
                 clone.find('.product-size').text(product?.size || '');
                 clone.find('.product-mrp').text(product?.mrp || 0);
                 clone.find('#product-quantity').attr('value', cartItem.quantity);
                 clone.find('#product-quantity').attr('id', 'product-quantity' + product.id);
-                clone.find('#update').attr('id', 'update' + product.id);
+                clone.find('.fa-trash-alt').attr('id', 'delete-' + product.id);
 
                 // Appnding the cloned element in the list
                 productList.append(clone);
@@ -53,12 +53,76 @@ $(document).ready(() => {
                 // Calculating subtotal
                 paymentInfo.subtotal += ((product?.mrp || 0) * Number(cartItem?.quantity || 0));
 
-                $('#update' + product.id).click(() => {
-                    const quantity = Number($('#product-quantity' + product.id).val());
-                    addToCart(product.id, quantity);
-                    $('#total-items').text(totalQuantity || 0);
-                })
+
+                $('#delete-' + product.id).on({
+                    'click': async function() {
+                        await checkuser();
+                        if (!checkSession()) return;
+                        $('.delBraName').text(product.name);
+                        $('#deleteModal').modal('toggle');
+                        $('#keep').on({
+                            'click': async function() {
+                                await checkuser();
+                                if (!checkSession()) return;
+                                var quantity = Number($('#product-quantity' + product.id).val());
+                                if (quantity == 0) {
+                                    quantity++;
+                                    addToCart(product.id, quantity);
+                                    $('#inputquantity' + product.id).text(quantity);
+                                }
+                                $('#deleteModal').modal('toggle');
+                            }
+                        });
+                        $("#delete").unbind('click');
+                        $('#delete').on({
+                            'click': async function() {
+                                await checkuser();
+                                if (!checkSession()) return;
+                                $('#closethis').click();
+                                deletethis(products, product.id);
+                            }
+                        });
+
+                    }
+                });
+
+                $('#increasebtn' + product.id).on({
+                    'click': async function() {
+                        await checkuser();
+                        if (!checkSession()) return;
+                        const quantity = Number($('#product-quantity' + product.id).val());
+                        addToCart(product.id, quantity);
+                        updatePayment(products, cartItems);
+                        $('#inputquantity' + product.id).text(quantity);
+                        $('#decreasebtn' + product.id).prop('disabled', false);
+                    }
+                });
+                $('#decreasebtn' + product.id).on({
+                    'click': async function() {
+                        await checkuser();
+                        if (!checkSession()) return;
+                        const quantity = Number($('#product-quantity' + product.id).val());
+                        if (quantity == 0) {
+                            $('#delete-' + product.id).click();
+                        }
+                        else {
+                            addToCart(product.id, quantity);
+                        }
+                        updatePayment(products, cartItems)
+                        $('#inputquantity' + product.id).text(quantity);
+                    }
+                });
             }
+        });
+        $('#deleteAll').click(async function() {
+            await checkuser();
+            if (!checkSession()) return;
+            const list = getCartItems();
+            list.forEach(item => {
+                deleteProduct(products, item.id);
+            });
+            $('#close').click();
+            showSuccess('Products deleted successfully');
         });
 
         // Removing the dummy element from the list
@@ -72,21 +136,21 @@ $(document).ready(() => {
         paymentInfo.total = +(paymentInfo.subtotal + paymentInfo.gst).toFixed(2);
 
         // Adding the payment values in the view
-        $('#subtotal').text(paymentInfo.subtotal);
-        $('#gst').text(paymentInfo.gst);
-        $('#total').text(paymentInfo.total);
+        $('#subtotal').text("Rs " + paymentInfo.subtotal);
 
-        $('#place-order').click(() => {
+        $('#place-order').click(async function() {
+            await checkuser();
             if (!checkSession()) return;
             downloadOrder(products);
         });
-        // Showing the page when the page is completly loaded and filled with data.
+        $('#delAll').removeClass('d-none');
         $('.container').removeClass('d-none');
     });
 
 });
 
-function deleteProduct(products, productId) {
+async function deleteProduct(products, productId) {
+    await checkuser();
     if (!checkSession()) return;
 
     // Updating the local storage after removing the product.
@@ -99,54 +163,49 @@ function deleteProduct(products, productId) {
     $('#product-list').find('#' + productId).first().remove();
 
     // Setting the total item value
-    $('#total-items').text(cartItems?.length || 0);
-
+    $('#total-items').text(totalQuantity || 0);
+    $('.cart-quantity').text(totalQuantity || 0);
     // Updating the payment info to consolidate the removed product.
+
     updatePayment(products, cartItems);
 
     // Removing payment section from view if the cart is empty
     if (!cartItems.length) removePaymentSection();
 
-    // Showing success message
-    showSuccess('Product deleted successfully');
+
 }
 
 function removePaymentSection() {
     $('#payment-section').addClass('d-none');
+    $('#delAll').addClass('d-none');
     $('#no-product').removeClass('d-none');
 }
 
-function updatePayment(products, cartItems) {
-    const paymentInfo = {
-        total: 0,
-        gst: 0,
-        subtotal: 0,
-    };
-
+async function updatePayment(products, cartItems) {
+    await checkuser();
+    if (!checkSession()) return;
+    let total = 0;
+    console.log(cartItems);
     cartItems.map(item => {
         const product = products.find(prod => prod.id === item.id);
 
         // Calculating subtotal
-        paymentInfo.subtotal += ((product?.mrp || 0) * Number(item?.quantity || 0));
+        total += ((product?.mrp || 0) * Number(item?.quantity || 0));
     });
-
-    paymentInfo.gst = +(0.14 * paymentInfo.subtotal).toFixed(2);
-    paymentInfo.total = +(paymentInfo.subtotal + paymentInfo.gst).toFixed(2);
-
     // Adding the payment values in the view
-    $('#subtotal').text(paymentInfo.subtotal);
-    $('#gst').text(paymentInfo.gst);
-    $('#total').text(paymentInfo.total);
+    $('#subtotal').text("Rs " + total);
 }
 
-function downloadOrder(productsList) {
+async function downloadOrder(productsList) {
+    await checkuser();
+    if (!checkSession()) return;
     const cartItems = getCartItems();
 
     if (!cartItems.length) {
         showError('No products added. Please add more products to place an order');
         return;
     }
-    const fields = ["brand", "name", "clientSkuId", "size", "mrp"];
+    const fields = ["id", "name", "brand", "category", "size", "mrp", "quantity"];
 
     // creating an array of products based on the fields.
     const products = cartItems.map(item => {
@@ -156,9 +215,7 @@ function downloadOrder(productsList) {
         for (field of fields) temp[field] = product[field];
 
         temp.quantity = item.quantity;
-        temp.subtotal = product.mrp * item.quantity;
-        temp.gst = +(temp.subtotal * 0.14).toFixed(2);
-        temp.total = +(temp.subtotal + temp.gst).toFixed(2);
+        temp.total = product.mrp * item.quantity;
 
         return temp;
     });
@@ -183,11 +240,13 @@ function downloadOrder(productsList) {
     tempLink.href = csvURL;
     tempLink.setAttribute('download', 'order.csv');
     tempLink.click();
-    // deleteAll();
-    showSuccess('Order placed successfully');
-
-}
-function deleteAll() {
     const list = getCartItems();
-
+    list.forEach(item => {
+        deleteProduct(products, item.id);
+    });
+    $('#success').modal('toggle');
+    $('#goHome').click(() => {
+        window.location.href = "../index.html";
+    });
 }
+

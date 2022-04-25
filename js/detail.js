@@ -8,17 +8,18 @@ fetch("../assets/available-inventory.json").then(response => {
   creds = JSON.stringify(data);
   getProduct(creds);
 });
-function getProduct(data) {
+async function getProduct(data) {
+  await checkuser();
+  if (!checkSession()) return;
   var product = JSON.parse(data);
   for (let p of product) {
-    if (p.id === id) {
+    if (p.id == id) {
       prod = p;
       break;
     }
   }
   if (prod == undefined) {
     $('#noprod').removeClass('d-none');
-    setTimeout(redirectToHome, 5000);
   }
   else {
     $('#noprod').addClass('d-none');
@@ -36,6 +37,10 @@ function getProduct(data) {
 
     carouselItem.remove();
     item.find('input').attr('value', getQuant(prod.id));
+    if (getQuant(prod.id) < 1) {
+      item.find('#decreasebtn').prop('disabled', true);
+    }
+    item.find('#inputquantity').text(getQuant(prod.id));
     item.find('#product-image').attr('src', prod.imageUrl);
     item.find('#product-brand').text(prod.brand);
     item.find('#product-name').text(prod.name);
@@ -51,14 +56,52 @@ function getProduct(data) {
   //   addToCart(id, quantity);
   // });
   $('#add-to-cart-btn').on({
-    'click': () => {
+    'click': async function () {
+      await checkuser();
+      if (!checkSession()) return;
       const quantity = Number($('#quant').val());
-      console.log(quantity);
-      addToCart(id, quantity);
+      addToCart(prod.id, quantity);
+    }
+  });
+
+  $('#increasebtn').on({
+    'click': async function () {
+      await checkuser();
+      if (!checkSession()) return;
+      const quantity = Number($('#quant').val());
+      addToCart(prod.id, quantity);
+      $('#inputquantity').text(quantity);
+      $('#decreasebtn').prop('disabled', false);
+    }
+  });
+  $('#decreasebtn').on({
+    'click': async function () {
+      await checkuser();
+      if (!checkSession()) return;
+      const quantity = Number($('#quant').val());
+      if (quantity == 0) {
+        removethis(prod.id);
+        $('#decreasebtn').prop('disabled', true);
+      }
+      else {
+        addToCart(prod.id, quantity);
+      }
+      $('#inputquantity').text(quantity);
     }
   });
 }
 
 function redirectToHome() {
-  window.location.href = "../index.html";
+  window.location.href = "./product.html";
+}
+
+async function removethis(id) {
+  await checkuser();
+  if (!checkSession()) return;
+  let cartItems = getCartItems();
+
+  cartItems = cartItems.filter(item => item.id !== id);
+  setCartItems(cartItems);
+  $('.cart-quantity').text(totalQuantity || 0);
+  showSuccess("Product removed.");
 }
